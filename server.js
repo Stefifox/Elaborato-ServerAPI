@@ -66,6 +66,66 @@ app.get('/users', (req, res) => {
 
 });
 
+app.get('/sports', (req, res) => {
+    let data = req.query
+    let id = data.id
+
+    let response = new Object()
+    response["response"] = 200
+    response["description"] = "Ok"
+    response["content"] = "List of sports"
+    if (id == undefined) {
+        response["sports"] = []
+        try {
+            con.query(`SELECT * FROM sport ORDER BY sport.idSport`, (err, ris) => {
+                if (err) {
+                    res.status(500).json({
+                        "response": 500,
+                        "description": err
+                    })
+                }
+                ris.forEach(element => {
+                    //console.log(element)
+                    let data = new Object()
+                    data["id"] = element.idSport
+                    data["nome"] = element.nome
+                    response["sports"].push(data)
+                });
+                res.status(200).json(response)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    if (id != undefined) {
+        try {
+            con.query(`SELECT * FROM sport WHERE idSport = ${id}`, (err, ris) => {
+                if (err) {
+                    res.status(500).json({
+                        "response": 500,
+                        "description": err
+                    })
+                }
+                if (ris.length > 0) {
+                    ris.forEach(element => {
+                        //console.log(element)
+                        let data = {}
+                        data["id"] = element.idSport
+                        data["nome"] = element.nome
+                        response["sport"]= data
+                    });
+                    res.status(200).json(response)
+                }
+
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+})
+
 //.post Definisce cosa deve fare il server in caso di richiesta post
 // /resgisttation può essere chiamato mediante metodo post e si occupa di inserire un nuovo utente nel database
 app.post('/registration', (req, res) => {
@@ -96,7 +156,7 @@ app.post('/registration', (req, res) => {
     }
 
 })
-
+// /login permette di reperire le informazioni dell'utente mediante email + password
 app.post('/login', (req, res) => {
     let data = req.body
     let mail = data.mail
