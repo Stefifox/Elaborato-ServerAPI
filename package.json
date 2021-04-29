@@ -1,0 +1,21 @@
+{
+  "name": "apiserver",
+  "version": "0.1.0",
+  "description": "Api Server per l'elaborato",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "Server",
+    "API"
+  ],
+  "author": "Stefano",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mysql": "^2.18.1"
+  }
+}
