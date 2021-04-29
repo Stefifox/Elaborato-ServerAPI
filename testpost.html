@@ -1,12 +1,28 @@
 <html>
-    <body>
+
+<body>
     <h1>Registraione</h1>
     <form action="http://localhost:5500/registration" method="POST">
+        <label>nome: </label>
+        <input type="text" name="nome"><br>
+        <label>cognome: </label>
+        <input type="text" name="cognome"><br>
         <label>username: </label>
         <input type="text" name="username"><br>
-        <label>pass: </label>
+        <label>mail: </label>
+        <input type="text" name="mail"><br>
+        <label>password: </label>
         <input type="text" name="password"><br>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
-    </body>
+    <h1>login</h1>
+    <form action="http://localhost:5500/login" method="POST">
+        <label>mail: </label>
+        <input type="text" name="mail"><br>
+        <label>password: </label>
+        <input type="text" name="password"><br>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</body>
+
 </html>

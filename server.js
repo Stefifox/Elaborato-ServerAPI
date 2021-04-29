@@ -51,6 +51,9 @@ app.get('/users', (req, res) => {
                 //console.log(element)
                 let data = new Object()
                 data["id"] = element.idUtente
+                data["nome"] = element.nome
+                data["cognome"] = element.cognome
+                data["mail"] = element.email
                 data["username"] = element.user
                 data["password"] = element.pass
                 response["users"].push(data)
@@ -67,18 +70,21 @@ app.get('/users', (req, res) => {
 // /resgisttation può essere chiamato mediante metodo post e si occupa di inserire un nuovo utente nel database
 app.post('/registration', (req, res) => {
     let data = req.body
+    console.log(data)
+    let nome = data.nome
+    let cognome = data.cognome
+    let mail = data.mail
     let user = data.username
     let pass = data.password
 
     try {
-        con.query(`INSERT INTO utenti (user, pass) VALUES (?,?)`, [user, pass], err => {
+        con.query(`INSERT INTO utenti (nome, cognome, email, username, password) VALUES (?,?,?,?,?)`, [nome, cognome, mail, user, pass], err => {
 
             if (err) {
                 res.status(500).json({
                     "response": 500,
                     "description": err
                 })
-
             }
             res.status(200).json({
                 "response": 200,
@@ -89,6 +95,55 @@ app.post('/registration', (req, res) => {
         console.log(error)
     }
 
+})
+
+app.post('/login', (req, res) => {
+    let data = req.body
+    let mail = data.mail
+    let pass = data.password
+
+    con.query(`SELECT * FROM utenti WHERE email = "${mail}"`, (err, ris) => {
+
+        let response = new Object()
+        response["response"] = 200
+        response["description"] = "Ok"
+        response["content"] = "Userdata"
+
+        if (err) {
+            res.status(500).json({
+                "response": 500,
+                "description": err
+            })
+        }
+        if (ris.length > 0) {
+            ris.forEach(element => {
+                if (element.password === pass) {
+                    let data = {}
+                    data["id"] = element.idUtente
+                    data["nome"] = element.nome
+                    data["cognome"] = element.cognome
+                    data["mail"] = element.email
+                    data["username"] = element.user
+                    data["password"] = element.password
+                    response["user"] = data
+                    res.status(200).json(response)
+                } else {
+                    res.status(200).json({
+                        "response": 200,
+                        "description": "Ok",
+                        "content": "Wrong password"
+                    })
+                }
+            })
+        } else {
+            res.status(200).json({
+                "response": 200,
+                "description": "Ok",
+                "content": "No content"
+            })
+        }
+
+    })
 })
 
 //.listen Avvia il server sulla porta specificata e rimane in ascolto per le richieste
