@@ -66,6 +66,7 @@ app.get('/users', (req, res) => {
 
 });
 
+// /sport Permette di vedere la lista degli sport (opzionale id=N)
 app.get('/sports', (req, res) => {
     let data = req.query
     let id = data.id
@@ -113,9 +114,15 @@ app.get('/sports', (req, res) => {
                         let data = {}
                         data["id"] = element.idSport
                         data["nome"] = element.nome
-                        response["sport"]= data
+                        response["sport"] = data
                     });
                     res.status(200).json(response)
+                } else {
+                    res.status(404).json({
+                        "response": 404,
+                        "description": "not found",
+                        "content": "no elements at id " + id
+                    })
                 }
 
             })
@@ -123,6 +130,38 @@ app.get('/sports', (req, res) => {
             console.log(error)
         }
     }
+
+})
+
+app.get('/teams', (req, res) => {
+    let data = req.query
+
+    let response = new Object()
+    response["response"] = 200
+    response["description"] = "Ok"
+    response["content"] = "List of teams"
+    response["teams"] = []
+    con.query(`SELECT squadre.idSquadra, squadre.nome, squadre.codNazione, sport.nome as 'sport', sport.descrizione FROM squadre, sport WHERE sport.idSport = squadre.idSport`, (err, ris) => {
+        if (err) {
+            res.status(500).json({
+                "response": 500,
+                "description": err
+            })
+        }
+        ris.forEach(element => {
+            let data = new Object()
+            let sportData = {}
+            data["id"] = element.idSquadra
+            data["nome"] = element.nome
+            data["nazione"] = element.codNazione
+            sportData["nome"] = element.sport
+            sportData["descrizione"] = element.descrizione
+            data["sport"] = sportData
+            response["teams"].push(data)
+            
+        });
+        res.status(200).json(response)
+    })
 
 })
 
@@ -188,18 +227,18 @@ app.post('/login', (req, res) => {
                     response["user"] = data
                     res.status(200).json(response)
                 } else {
-                    res.status(200).json({
-                        "response": 200,
-                        "description": "Ok",
+                    res.status(403).json({
+                        "response": 403,
+                        "description": "Forbidden Access",
                         "content": "Wrong password"
                     })
                 }
             })
         } else {
-            res.status(200).json({
-                "response": 200,
-                "description": "Ok",
-                "content": "No content"
+            res.status(404).json({
+                "response": 404,
+                "description": "Not found",
+                "content": "No element found"
             })
         }
 
