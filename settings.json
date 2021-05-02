@@ -1,0 +1,9 @@
+{
+    "serverPort":5500,
+    "database":{
+        "host":"localhost",
+        "user":"root",
+        "password":"root",
+        "dbName":"elaborato"
+    }
+}

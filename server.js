@@ -1,4 +1,5 @@
 //Deifinizione delle librerie utilizzate
+const settings = require('./settings.json')
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -6,7 +7,7 @@ const mysql = require('mysql')
 
 //Definizione costanti
 const app = express()
-const port = 5500;
+const port = settings.serverPort;
 
 //Configurazione app
 app.use(cors())
@@ -16,10 +17,10 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 let con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "root",
-    database: "elaborato"
+    host: settings.database.host,
+    user: settings.database.user,
+    password: settings.database.password,
+    database: settings.database.dbName
 })
 
 
