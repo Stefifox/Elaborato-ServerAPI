@@ -4,6 +4,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const mysql = require('mysql')
+const crypto = require('crypto-js')
 
 //Definizione costanti
 const app = express()
@@ -134,6 +135,7 @@ app.get('/sports', (req, res) => {
 
 })
 
+
 app.get('/teams', (req, res) => {
     let data = req.query
 
@@ -175,7 +177,16 @@ app.post('/registration', (req, res) => {
     let cognome = data.cognome
     let mail = data.mail
     let user = data.username
-    let pass = data.password
+    let pass = crypto.MD5(data.password).toString()
+
+    let token = req.query.token
+    if(token != 'c2e1b21e0a17d28c667cc0a774cb0152'){ //Token univoco per verificare che la registrazione avviene da un app autorizzata
+        let response = new Object()
+        response["response"] = 400
+        response["description"] = "Bad request"
+        res.status(400).json(response)
+        return
+    }
 
     try {
         con.query(`INSERT INTO utenti (nome, cognome, email, username, password) VALUES (?,?,?,?,?)`, [nome, cognome, mail, user, pass], err => {
@@ -200,7 +211,16 @@ app.post('/registration', (req, res) => {
 app.post('/login', (req, res) => {
     let data = req.body
     let mail = data.mail
-    let pass = data.password
+    let pass = crypto.MD5(data.password).toString()
+
+    let token = req.query.token
+    if(token != '51c8b422852557a12d3778270037538c'){ //Token univoco per verificare che il login avviene da un app autorizzata
+        let response = new Object()
+        response["response"] = 400
+        response["description"] = "Bad request"
+        res.status(400).json(response)
+        return
+    }
 
     con.query(`SELECT * FROM utenti WHERE email = "${mail}"`, (err, ris) => {
 
