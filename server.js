@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const mysql = require('mysql')
 const crypto = require('crypto-js')
+const Str = require('@supercharge/strings')
+
 
 //Definizione costanti
 const app = express()
@@ -24,6 +26,17 @@ let con = mysql.createConnection({
     database: settings.database.dbName
 })
 
+//recupero le informazioni dalla API esterna
+function fetchAPI(sport) {
+    search_url = "http://localhost:3000/" + sport
+    return (fetch(search_url, {
+            method: "GET"
+        })
+        .then(res => res.json())
+        .then((json) => {
+            return (json.data)
+        }))
+}
 
 //Definizionne codice
 //.get Definisce cosa deve fare il server se riceve una rihiesta di tipo get
@@ -161,7 +174,7 @@ app.get('/teams', (req, res) => {
             sportData["descrizione"] = element.descrizione
             data["sport"] = sportData
             response["teams"].push(data)
-            
+
         });
         res.status(200).json(response)
     })
@@ -180,7 +193,7 @@ app.post('/registration', (req, res) => {
     let pass = crypto.MD5(data.password).toString()
 
     let token = req.query.token
-    if(token != 'c2e1b21e0a17d28c667cc0a774cb0152'){ //Token univoco per verificare che la registrazione avviene da un app autorizzata
+    if (token != 'c2e1b21e0a17d28c667cc0a774cb0152') { //Token univoco per verificare che la registrazione avviene da un app autorizzata
         let response = new Object()
         response["response"] = 400
         response["description"] = "Bad request"
@@ -207,6 +220,44 @@ app.post('/registration', (req, res) => {
     }
 
 })
+
+app.post('/setToken', (req, res) => {
+    let data = req.query
+    let userId = data.id
+
+    let randomToken = Str.random(40)  
+
+    con.query(`SELECT * FROM utenti WHERE idUtente = "${userId}"`, (err, ris) => {
+        if (err) {
+            res.status(500).json({
+                "response": 500,
+                "description": err
+            })
+        }
+        if (ris.length > 0) {
+            con.query(`UPDATE utenti SET token = "${randomToken}" WHERE idUtente = "${userId}"`, err1 => {
+                if (err1) {
+                    res.status(500).json({
+                        "response": 500,
+                        "description": err
+                    })
+                }
+                res.status(200).json({
+                    "response": 500,
+                    "description": "OK",
+                    "content": "Token set successfully"
+                })
+            })
+        } else {
+            res.status(404).json({
+                "response": 404,
+                "description": "Not found",
+                "content": "No resourced found at id " + userId
+            })
+        }
+    })
+})
+
 // /login permette di reperire le informazioni dell'utente mediante email + password
 app.post('/login', (req, res) => {
     let data = req.body
@@ -214,7 +265,7 @@ app.post('/login', (req, res) => {
     let pass = crypto.MD5(data.password).toString()
 
     let token = req.query.token
-    if(token != '51c8b422852557a12d3778270037538c'){ //Token univoco per verificare che il login avviene da un app autorizzata
+    if (token != '51c8b422852557a12d3778270037538c') { //Token univoco per verificare che il login avviene da un app autorizzata
         let response = new Object()
         response["response"] = 400
         response["description"] = "Bad request"
@@ -245,6 +296,7 @@ app.post('/login', (req, res) => {
                     data["mail"] = element.email
                     data["username"] = element.user
                     data["password"] = element.password
+                    data["identityToken"] = element.token
                     response["user"] = data
                     res.status(200).json(response)
                 } else {
