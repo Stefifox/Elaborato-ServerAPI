@@ -105,6 +105,7 @@ app.get('/sports', (req, res) => {
                     let data = new Object()
                     data["id"] = element.idSport
                     data["nome"] = element.nome
+                    data["descizione"] = element.descrizione
                     response["sports"].push(data)
                 });
                 res.status(200).json(response)
