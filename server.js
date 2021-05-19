@@ -38,6 +38,17 @@ function fetchAPI(sport) {
         }))
 }
 
+function fetchToken(id){
+    url_req = "/setToken?id=" + id
+     return (fetch(url_req, {
+            method: "GET"
+        })
+        .then(res => res.json())
+        .then((json) => {
+            return (json.data)
+        }))
+}
+
 //Definizionne codice
 //.get Definisce cosa deve fare il server se riceve una rihiesta di tipo get
 // Pagina che viene caricata all'indirizzo principale
@@ -45,7 +56,7 @@ app.get('/', (req, res) => {
     res.status(200).send('<h1>Main page<h1>\n<h2>Server by Stefano Campostrini</h2>')
 });
 
-// /users restituisce una lista di utenti in formato JSON, in caso di errore del server mySQL restituisce un errore 500 con descrizione del problema
+/* /users restituisce una lista di utenti in formato JSON, in caso di errore del server mySQL restituisce un errore 500 con descrizione del problema
 app.get('/users', (req, res) => {
 
     let response = new Object()
@@ -79,7 +90,7 @@ app.get('/users', (req, res) => {
         console.log(error)
     }
 
-});
+});*/
 
 // /sport Permette di vedere la lista degli sport (opzionale id=N)
 app.get('/sports', (req, res) => {
@@ -186,14 +197,14 @@ app.get('/teams', (req, res) => {
 // /resgisttation può essere chiamato mediante metodo post e si occupa di inserire un nuovo utente nel database
 app.post('/registration', (req, res) => {
     let data = req.body
-    console.log(data)
+    // console.log(data)
     let nome = data.nome
     let cognome = data.cognome
     let mail = data.mail
     let user = data.username
     let pass = crypto.MD5(data.password).toString()
 
-    let token = req.query.token
+    let token = req.body.token
     if (token != 'c2e1b21e0a17d28c667cc0a774cb0152') { //Token univoco per verificare che la registrazione avviene da un app autorizzata
         let response = new Object()
         response["response"] = 400
@@ -265,7 +276,7 @@ app.post('/login', (req, res) => {
     let mail = data.mail
     let pass = crypto.MD5(data.password).toString()
 
-    let token = req.query.token
+    let token = req.body.token
     if (token != '51c8b422852557a12d3778270037538c') { //Token univoco per verificare che il login avviene da un app autorizzata
         let response = new Object()
         response["response"] = 400
@@ -274,7 +285,7 @@ app.post('/login', (req, res) => {
         return
     }
 
-    con.query(`SELECT * FROM utenti WHERE email = "${mail}"`, (err, ris) => {
+    con.query(`SELECT * FROM utenti WHERE email = "${mail}" OR username = "${mail}"`, (err, ris) => {
 
         let response = new Object()
         response["response"] = 200
@@ -289,16 +300,18 @@ app.post('/login', (req, res) => {
         }
         if (ris.length > 0) {
             ris.forEach(element => {
+                //console.log(element)
                 if (element.password === pass) {
                     let data = {}
                     data["id"] = element.idUtente
                     data["nome"] = element.nome
                     data["cognome"] = element.cognome
                     data["mail"] = element.email
-                    data["username"] = element.user
+                    data["username"] = element.username
                     data["password"] = element.password
                     data["identityToken"] = element.token
                     response["user"] = data
+
                     res.status(200).json(response)
                 } else {
                     res.status(403).json({
