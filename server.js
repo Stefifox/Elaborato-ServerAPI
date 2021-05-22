@@ -359,7 +359,7 @@ app.post('/changepass', (req, res)=>{
     let oldp = crypto.MD5(data.old).toString()
     let newp = crypto.MD5(data.new).toString()
 
-    con.query(`SELECT * FROM utenti WHERE id = ${id}`, (err, ris) => {
+    con.query(`SELECT * FROM utenti WHERE idUtente = ${id}`, (err, ris) => {
 
         if (err) {
             res.status(500).json({
@@ -372,11 +372,16 @@ app.post('/changepass', (req, res)=>{
 
             ris.forEach(e=>{
                 if(e.password === oldp){
-                    con.query(`UPDATE utenti SET password = "${newp}" WHERE id = ${id}`, err=>{
+                    con.query(`UPDATE utenti SET password = "${newp}" WHERE idUtente = ${id}`, err=>{
                         if (err) {
                             res.status(500).json({
                                 "response": 500,
                                 "description": err
+                            })
+                        }else{
+                            res.status(200).json({
+                                "response": 200,
+                                "description": "OK"
                             })
                         }
                     })
