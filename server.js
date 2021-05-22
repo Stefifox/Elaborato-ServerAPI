@@ -351,7 +351,7 @@ app.post('/login', (req, res) => {
 
     })
 })
-
+//Cambio password
 app.post('/changepass', (req, res)=>{
 
     let data = req.body
@@ -359,7 +359,7 @@ app.post('/changepass', (req, res)=>{
     let oldp = crypto.MD5(data.old).toString()
     let newp = crypto.MD5(data.new).toString()
 
-    con.query(`SELECT * FROM utenti WHERE idUtente = ${id}`, (err, ris) => {
+    con.query(`SELECT * FROM utenti WHERE idUtente = ${id}`, (err, ris) => { //Verifico se l'utente all'id esiste e la sua password
 
         if (err) {
             res.status(500).json({
@@ -372,7 +372,7 @@ app.post('/changepass', (req, res)=>{
 
             ris.forEach(e=>{
                 if(e.password === oldp){
-                    con.query(`UPDATE utenti SET password = "${newp}" WHERE idUtente = ${id}`, err=>{
+                    con.query(`UPDATE utenti SET password = "${newp}" WHERE idUtente = ${id}`, err=>{ //Effettuo il cambio password
                         if (err) {
                             res.status(500).json({
                                 "response": 500,
