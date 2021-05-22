@@ -38,9 +38,9 @@ function fetchAPI(sport) {
         }))
 }
 
-function fetchToken(id){
+function fetchToken(id) {
     url_req = "/setToken?id=" + id
-     return (fetch(url_req, {
+    return (fetch(url_req, {
             method: "GET"
         })
         .then(res => res.json())
@@ -193,11 +193,31 @@ app.get('/teams', (req, res) => {
 
 })
 
+app.get('/getToken', (req, res) => {
+    let data = req.query
+
+    let userId = data.id
+
+    let randomToken = Str.random(40)
+
+    con.query(`SELECT * FROM utenti WHERE idUtente = "${userId}"`, (err, ris) => {
+
+        res.status(200).json({
+            "response": 200,
+            "description": "Ok",
+            "token": ris.identityToken
+        })
+
+    })
+
+
+})
+
 //.post Definisce cosa deve fare il server in caso di richiesta post
 // /resgisttation può essere chiamato mediante metodo post e si occupa di inserire un nuovo utente nel database
 app.post('/registration', (req, res) => {
     let data = req.body
-    // console.log(data)
+    console.log(data)
     let nome = data.nome
     let cognome = data.cognome
     let mail = data.mail
@@ -233,11 +253,11 @@ app.post('/registration', (req, res) => {
 
 })
 
-app.post('/setToken', (req, res) => {
+app.get('/setToken', (req, res) => {
     let data = req.query
     let userId = data.id
 
-    let randomToken = Str.random(40)  
+    let randomToken = Str.random(40)
 
     con.query(`SELECT * FROM utenti WHERE idUtente = "${userId}"`, (err, ris) => {
         if (err) {
@@ -330,6 +350,55 @@ app.post('/login', (req, res) => {
         }
 
     })
+})
+
+app.post('/changepass', (req, res)=>{
+
+    let data = req.body
+    let id = data.id
+    let oldp = crypto.MD5(data.old).toString()
+    let newp = crypto.MD5(data.new).toString()
+
+    con.query(`SELECT * FROM utenti WHERE id = ${id}`, (err, ris) => {
+
+        if (err) {
+            res.status(500).json({
+                "response": 500,
+                "description": err
+            })
+        }
+
+        if(ris.length>0){
+
+            ris.forEach(e=>{
+                if(e.password === oldp){
+                    con.query(`UPDATE utenti SET password = "${newp}" WHERE id = ${id}`, err=>{
+                        if (err) {
+                            res.status(500).json({
+                                "response": 500,
+                                "description": err
+                            })
+                        }
+                    })
+                }else{
+                    res.status(403).json({
+                        "response": 403,
+                        "description": "Forbidden Access",
+                        "content": "Wrong password"
+                    })
+                }
+            })
+
+        }else{
+            res.status(404).json({
+                "response": 404,
+                "description": "Not found",
+                "content": "No resourced found at id " + id
+            })
+        }
+
+    })
+
 })
 
 //.listen Avvia il server sulla porta specificata e rimane in ascolto per le richieste
