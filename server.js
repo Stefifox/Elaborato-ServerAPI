@@ -92,6 +92,34 @@ app.get('/users', (req, res) => {
 
 });*/
 
+// Si occupa di recuperare i preferiti all'id corrispondente
+app.get('/getFollow', (req, res)=>{
+    let data = req.query
+    let id = data.id
+
+    let response = new Object()
+
+    response["response"] = 200
+    response["description"] = "Ok"
+    response["content"] = "List"
+    con.query(`SELECT squadre.idSquadra AS "id", squadre.nome, squadre.codNazione FROM utenti, preferisce, squadre WHERE utenti.idUtente = preferisce.idUtente AND squadre.idSquadra = preferisce.idSquadra AND utenti.idUtente = ${id}`, (err, ris)=>{
+        console.log(ris)
+        response["follow"] = []
+        if(ris.length>0){
+            ris.forEach(e=>{
+                let data = new Object()
+                data["id"] = e.id
+                data["nome"] = e.nome
+                data["codNazione"] = e.codNazione
+                response["follow"].push(data)
+            })
+            res.status(200).json(response)
+        }else{
+            res.status(404).json({"response":404,"description":"Not Found"})
+        }
+    })
+})
+
 // /sport Permette di vedere la lista degli sport (opzionale id=N)
 app.get('/sports', (req, res) => {
     let data = req.query
@@ -169,7 +197,7 @@ app.get('/teams', (req, res) => {
     response["description"] = "Ok"
     response["content"] = "List of teams"
     response["teams"] = []
-    con.query(`SELECT squadre.idSquadra, squadre.nome, squadre.codNazione, sport.nome as 'sport', sport.descrizione FROM squadre, sport WHERE sport.idSport = squadre.idSport`, (err, ris) => {
+    con.query(`SELECT squadre.idSquadra, squadre.nome, squadre.codNazione, sport.nome as 'sport', sport.descrizione, sport.idSport FROM squadre, sport WHERE sport.idSport = squadre.idSport`, (err, ris) => {
         if (err) {
             res.status(500).json({
                 "response": 500,
@@ -182,6 +210,7 @@ app.get('/teams', (req, res) => {
             data["id"] = element.idSquadra
             data["nome"] = element.nome
             data["nazione"] = element.codNazione
+            sportData["id"] = element.idSport
             sportData["nome"] = element.sport
             sportData["descrizione"] = element.descrizione
             data["sport"] = sportData
