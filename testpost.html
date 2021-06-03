@@ -2,7 +2,9 @@
 
 <body>
     <h1>Registraione</h1>
-    <form action="http://localhost:5500/registration?token=c2e1b21e0a17d28c667cc0a774cb0152" method="POST">
+    <form action="http://localhost:5500/registration" method="POST">
+        <label>Token</lable>
+        <input type="text" name="token" value="c2e1b21e0a17d28c667cc0a774cb0152" disabled="disabled"><br>
         <label>nome: </label>
         <input type="text" name="nome"><br>
         <label>cognome: </label>
@@ -16,7 +18,9 @@
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
     <h1>login</h1>
-    <form action="http://localhost:5500/login?token=51c8b422852557a12d3778270037538c" method="POST">
+    <form action="http://localhost:5500/login" method="POST">
+       <label>Token</lable>
+        <input type="text" name="token" value="51c8b422852557a12d3778270037538c" disabled="disabled"><br>
         <label>mail: </label>
         <input type="text" name="mail"><br>
         <label>password: </label>
